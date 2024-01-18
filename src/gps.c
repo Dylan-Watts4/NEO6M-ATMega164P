@@ -70,5 +70,6 @@ GLLSentence readGLL(void) {
         }
         token = strtok(NULL, ',');
         tokenIndex++;
+        return sentence;
     }
 }
