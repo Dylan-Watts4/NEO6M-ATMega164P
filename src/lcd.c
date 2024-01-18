@@ -155,3 +155,39 @@ void writeString(char *str) {
         }
     }
 }
+
+/**
+ * @brief Clear the LCD screen
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see setFunction()
+ * @see writeCommand()
+*/
+void clearLCD(void) {
+    // Remember that the writeCommand() function already sets the RS_PIN to 0 and the RW_PIN to 0
+    // See writeCommand() for more information
+    // Clear the LCD screen, refer to the ST7066U datasheet page 17 and 18 for more information
+    writeCommand(0x01);
+    // Set the cursor to the home position, refer to the ST7066U datasheet page 17 for more information
+    writeCommand(0x02);
+}
+
+/**
+ * @brief Turn the display on or off
+ * @param toggle Toggle the display on or off
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see writeCommand()
+*/
+void displayON_OFF(bool toggle) {
+    if (toggle) {
+        // Turn the display on, refer to the ST7066U datasheet page 17 and 19 for more information
+        // May need ammending depending on the testing
+        writeCommand(0x0C);
+    } else {
+        // Turn the display off, refer to the ST7066U datasheet page 17 and 19 for more information
+        writeCommand(0x08);
+    }
+}
+
+bool isBusy(void) {
+    
+}
