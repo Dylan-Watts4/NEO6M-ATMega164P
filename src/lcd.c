@@ -37,7 +37,7 @@
 #define E_PIN           PB5
 #define RS_PIN          PB6
 #define RW_PIN          PB7
-#define IO_DB_PORT      DDRC
+#define IO_DB_PORT      DDRD
 #define DB_PINS         PORTD
 
 /**
@@ -188,6 +188,27 @@ void displayON_OFF(bool toggle) {
     }
 }
 
+/**
+ * @brief Check whether the LCD is busy
+ * @return Whether the LCD is busy or not
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see setFunction()
+*/
 bool isBusy(void) {
-    
+    // Set the pins connected to the data bus to input mode
+    IO_DB_PORT = 0x00;
+    // Set the function of the controller to check the busy flag
+    // Refer to the ST7066U datasheet page 9 table 1 for more information
+    setFunction(0, 1);
+    // Shift the data bus to the right by 7 bits and check the LSB (least significant bit)
+    // If the LSB is 1, the LCD is busy
+    if ((DB_PINS >> 7) & 0x01) {
+        // Set the pins connected to the data bus to output mode
+        setFunction(1, 0);
+        return true;
+    } else {
+        // Set the pins connected to the data bus to output mode
+        setFunction(1, 0);
+        return false;
+    }
 }
