@@ -200,6 +200,7 @@ bool isBusy(void) {
     // Set the function of the controller to check the busy flag
     // Refer to the ST7066U datasheet page 9 table 1 for more information
     setFunction(0, 1);
+    // Refer to the ST7066U datasheet page 21 for more information
     // Shift the data bus to the right by 7 bits and check the LSB (least significant bit)
     // If the LSB is 1, the LCD is busy
     if ((DB_PINS >> 7) & 0x01) {
@@ -212,3 +213,4 @@ bool isBusy(void) {
         return false;
     }
 }
+
