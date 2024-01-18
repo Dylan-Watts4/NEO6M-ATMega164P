@@ -30,9 +30,8 @@
 // 15 - LED+ - Backlight anode (3.3V)
 // 16 - LED- - Backlight cathode
 
-// Function Operation, please refer to the ST7066U datasheet Page 9 Table 1
-
 // PIN DEFINITIONS ** MAKE SURE THESE ARE CORRECT **
+// These definitions are to ensure that limited changes to the code need to be made depending on the pinout
 #define IO_RS_RW_PORT   DDRB
 #define RS_RW_PORT      PORTB
 #define E_PIN           PB5
@@ -46,6 +45,7 @@
  * @warning Ensure that the defined pins are correct before runtime
 */
 void initLCD(void) {
+    // Set the respective pins to output mode, refer to definitions
     IO_RS_RW_PORT |= (1 << RS_PIN) | (1 << RW_PIN) | (1 << E_PIN);
     IO_DB_PORT = 0xFF;
     // TODO: Any other pins?
@@ -58,6 +58,7 @@ void initLCD(void) {
  * @warning Ensure that the defined pins are correct before runtime
 */
 void setFunction(bool RS_BIT, bool RW_BIT) {
+    // More information on the ST7066U datasheet Page 9 Table 1
     // Send RS_PIN and RW_PIN to LCD
     RS_RW_PORT &= (RS_BIT << RS_PIN) & (RW_BIT << RW_PIN);
 }
@@ -68,6 +69,7 @@ void setFunction(bool RS_BIT, bool RW_BIT) {
  * @warning Ensure that the defined pins are correct before runtime
 */
 void setDBData(uint8_t data) {
+    // The data bus pins carry the data which will go to pins DB0-DB7 on the LCD
     DB_PINS = data;
 }
 
@@ -95,6 +97,7 @@ void sendData(bool RS_BIT, bool RW_BIT, uint8_t data) {
  * @see sendData()
 */
 void writeChar(uint8_t data) {
+    // Refer to the ST7066U datasheet Page 9 Table 1 and sendData() for more information
     sendData(1, 0, data);
 }
 
@@ -105,6 +108,7 @@ void writeChar(uint8_t data) {
  * @see sendData()
 */
 void writeCommand(uint8_t command) {
+    // Refer to the ST7066U datasheet Page 9 Table 1 and sendData() for more information
     sendData(0, 0, command);
 }
 
@@ -134,11 +138,19 @@ uint8_t lcdCharacterMap[46] = {
  * @see writeChar()
 */
 void writeString(char *str) {
+    // Iterate through the string
     for (uint8_t i = 0; i < strlen(str); i++) {
+        // Store character in local memory (c)
         char c = str[i];
+        // Refer to the lcdCharacterMap array, begins at ASCII 44 (',') and ends at ASCII 90 ('Z')
+        // If further information needed, search ASCII table and verify the characters that will be used
         if (c >= 44 && c <= 90) {
+            // Write the character to the LCD, but given that lcdCharacterMap starts at ASCII 44, we need to subtract 44 from the character
             writeChar(lcdCharacterMap[c - 44]);
         } else {
+            // If the character is not in the lcdCharacterMap, write 0xFF to the LCD
+            // This is to ensure that the LCD does not display any random characters
+            // Refer to the LCD datasheet character map for more information
             writeChar(0xFF);
         }
     }
