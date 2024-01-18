@@ -13,5 +13,8 @@ void sendData(bool RS_BIT, bool RW_BIT, uint8_t data);
 void writeChar(uint8_t data);
 void writeCommand(uint8_t command);
 void writeString(char *str);
+void clearLCD(void);
+void displayON_OFF(bool toggle);
+bool isBusy(void);
 
 #endif
