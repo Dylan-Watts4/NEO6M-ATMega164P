@@ -49,12 +49,20 @@ void initLCD(void) {
     IO_RS_RW_PORT |= (1 << RS_PIN) | (1 << RW_PIN) | (1 << E_PIN);
     IO_DB_PORT = 0xFF;
     // TODO: Any other pins?
+    // Entry mode set may need assignment, further tests needed
+    // Refer to the ST7066U datasheet page 18 for more information
 }
 
-void toggleEnable() {
-    // Toggle the enable pin
+/**
+ * @brief Toggle the enable pin
+ * @warning Ensure that the defined pins are correct before runtime
+*/
+void toggleEnable(void) {
+    // Toggle the enable pin to 1
     RS_RW_PORT |= (1 << E_PIN);
+    // Delay for 1us as per the ST7066U datasheet
     _delay_us(1);
+    // Toggle the enable pin to 0
     RS_RW_PORT &= ~(1 << E_PIN);
 }
 
@@ -123,11 +131,13 @@ void writeCommand(uint8_t command) {
     sendData(0, 0, command);
 }
 
+
 // HAHAHA THE LCD MAPS WITH ASCII, I AM SAVED
 /**
  * @brief Maps the ASCII characters to the LCD character map
  * @warning This map starts from ASCII 44 (',') and ends at ASCII 90 ('Z')
 */
+/*
 uint8_t lcdCharacterMap[46] = {
     0x2C, 0x2D, 0x2E, 0x2F, 0x30,   // , - . / 0
     0x31, 0x32, 0x33, 0x34, 0x35,   // 1 2 3 4 5
@@ -140,6 +150,7 @@ uint8_t lcdCharacterMap[46] = {
     0x54, 0x55, 0x56, 0x57, 0x58,   // T U V W X
     0x59, 0x5A                      // Y Z
 };
+*/
 
 /**
  * @brief Write a string to the LCD
@@ -157,12 +168,14 @@ void writeString(char *str) {
         // If further information needed, search ASCII table and verify the characters that will be used
         if (c >= 44 && c <= 90) {
             // Write the character to the LCD, but given that lcdCharacterMap starts at ASCII 44, we need to subtract 44 from the character
-            writeChar(lcdCharacterMap[c - 44]);
+            // writeChar(lcdCharacterMap[c - 44]);
+            // As the LCD maps with ASCII, we can just write the character to the LCD
+            writeChar(c);
         } else {
             // If the character is not in the lcdCharacterMap, write 0xFF to the LCD
             // This is to ensure that the LCD does not display any random characters
             // Refer to the LCD datasheet character map for more information
-            writeChar(0xFF);
+            writeChar(0x20);
         }
     }
 }
@@ -179,7 +192,7 @@ void clearLCD(void) {
     // Clear the LCD screen, refer to the ST7066U datasheet page 17 and 18 for more information
     writeCommand(0x01);
     // Set the cursor to the home position, refer to the ST7066U datasheet page 17 for more information
-    writeCommand(0x02);
+    returnHome();
 }
 
 /**
@@ -204,6 +217,7 @@ void displayON_OFF(bool toggle) {
  * @return Whether the LCD is busy or not
  * @warning Ensure that the defined pins are correct before runtime
  * @see setFunction()
+ * @see toggleEnable()
 */
 bool isBusy(void) {
     // Set the pins connected to the data bus to input mode
@@ -226,4 +240,50 @@ bool isBusy(void) {
     }
 }
 
-// TODO: Add cursor position functions
+/**
+ * @brief Shift the cursor to the left
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see writeCommand()
+*/
+void shiftCursorLeft(void) {
+    uint8_t command = 0x10;
+    // Refer to the ST7066U datasheet page 19 for more information
+    writeCommand(command);
+}
+
+/**
+ * @brief Shift the cursor to the right
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see writeCommand()
+*/
+void shiftCursorRight(void) {
+    uint8_t command = 0x14;
+    // Refer to the ST7066U datasheet page 19 for more information
+    writeCommand(command);
+}
+
+/**
+ * @brief Return cursor to home position
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see writeCommand()
+*/
+void returnHome(void) {
+    uint8_t command = 0x02;
+    // Refer to the ST7066U datasheet page 18 for more information
+    writeCommand(command);
+}
+
+/**
+ * @brief Shift the cursor to the second line
+ * @warning Ensure that the defined pins are correct before runtime
+ * @see returnHome()
+ * @see shiftCursorRight()
+*/
+void shiftCursorToNewLine(void) {
+    returnHome();
+    // The cursor moves to the second line after 40 characters
+    // Refer to the ST7066U datasheet page 19 for more information
+    for (uint8_t i = 0; i < 40; i++) {
+        shiftCursorRight();
+    }
+}
