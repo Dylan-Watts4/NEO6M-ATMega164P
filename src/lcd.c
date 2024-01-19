@@ -51,6 +51,13 @@ void initLCD(void) {
     // TODO: Any other pins?
 }
 
+void toggleEnable() {
+    // Toggle the enable pin
+    RS_RW_PORT |= (1 << E_PIN);
+    _delay_us(1);
+    RS_RW_PORT &= ~(1 << E_PIN);
+}
+
 /**
  * @brief Set RS_PIN and RW_PIN to LCD
  * @param RS_BIT Register select
@@ -58,9 +65,11 @@ void initLCD(void) {
  * @warning Ensure that the defined pins are correct before runtime
 */
 void setFunction(bool RS_BIT, bool RW_BIT) {
+    // Clear the RS_PIN and RW_PIN
+    RS_RW_PORT &= ~((1 << RS_PIN) | (1 << RW_PIN));
     // More information on the ST7066U datasheet Page 9 Table 1
     // Send RS_PIN and RW_PIN to LCD
-    RS_RW_PORT &= (RS_BIT << RS_PIN) & (RW_BIT << RW_PIN);
+    RS_RW_PORT |= ((RS_BIT << RS_PIN) | (RW_BIT << RW_PIN));
 }
 
 /**
@@ -88,6 +97,8 @@ void sendData(bool RS_BIT, bool RW_BIT, uint8_t data) {
     setFunction(RS_BIT, RW_BIT);
     // Set the data bus
     setDBData(data);
+    // Toggle the enable pin
+    toggleEnable();
 }
 
 /**
@@ -200,6 +211,7 @@ bool isBusy(void) {
     // Set the function of the controller to check the busy flag
     // Refer to the ST7066U datasheet page 9 table 1 for more information
     setFunction(0, 1);
+    toggleEnable();
     // Refer to the ST7066U datasheet page 21 for more information
     // Shift the data bus to the right by 7 bits and check the LSB (least significant bit)
     // If the LSB is 1, the LCD is busy
