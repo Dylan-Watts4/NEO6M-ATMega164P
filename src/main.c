@@ -40,12 +40,20 @@ void initButton(void) {
     DDRD &= ~((1 << UP_PIN) | (1 << DOWN_PIN) | (1 << LEFT_PIN) | (1 << RIGHT_PIN));
     PORTD |= (1 << UP_PIN) | (1 << DOWN_PIN) | (1 << LEFT_PIN) | (1 << RIGHT_PIN);
     // Enable external interrupt on INT0
-    EIMSK |= (1 << INT0);
-    // Trigger interrupt on falling edge
     EICRA |= (1 << ISC01);
+    EIMSK |= (1 << INT0);
 }
 
 // Button interrut logic
 ISR(INT0_vect) {
     // Button logic may need to make menu global
+    if (UP_PIN == 0) {
+        // Do something
+    } else if (DOWN_PIN == 0) {
+        // Do something
+    } else if (LEFT_PIN == 0) {
+        // Do something
+    } else if (RIGHT_PIN == 0) {
+        // Do something
+    }
 }

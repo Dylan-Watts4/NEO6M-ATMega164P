@@ -1,11 +1,3 @@
-/**
- * @file gps.c
- * @author Dylan Watts
- * @date 17/1/2024
- * @version 1.0
- * @brief GPS driver for the ATMega164P
-*/
-
 #include "gps.h"
 #include "uart.h"
 
@@ -38,7 +30,7 @@ GLLSentence readGLL(void) {
     }
     // Flush the UART buffer to ensure the next sentence is read correctly
     flushUART();
-    // Tokenize the ',' character to seperate the sentence into its components
+    // Tokenize the ',' character
     char *token = strtok(buffer, ',');
     uint8_t tokenIndex = 0;
     while (token != NULL) {
@@ -70,8 +62,8 @@ GLLSentence readGLL(void) {
         }
         token = strtok(NULL, ',');
         tokenIndex++;
-        return sentence;
     }
+    return sentence;
 }
 
 char* makeSentenceString(GLLSentence sentence) {
@@ -80,6 +72,14 @@ char* makeSentenceString(GLLSentence sentence) {
     return buffer;
 }
 
-bool validGLL(GLLSentence sentence) {
-    // TODO Implement checksum validation
+bool validGLL(char *buffer, int size) {
+    uint8_t checksum = 0;
+    for (int i = 0; i < size; i++) {
+        if (buffer[i] == '$') continue;
+        if (buffer[i] == '*') break;
+        checksum ^= buffer[i];
+    }
+    char checksumString[3];
+    sprintf(checksumString, "%X", checksum);
+    return (checksumString[0] == buffer[size - 2]) && (checksumString[1] == buffer[size - 1]);
 }

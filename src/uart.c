@@ -1,11 +1,3 @@
-/**
- * @file uart.c
- * @author Dylan Watts
- * @date 17/1/2024
- * @version 1.0
- * @brief UART driver for the ATMega164P
-*/
-
 #include "uart.h"
 
 /**
