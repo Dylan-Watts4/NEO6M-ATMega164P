@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #ifndef F_CPU
-#define F_CPU 16e6
+#define F_CPU 20e6
 #endif
 
 // Functions

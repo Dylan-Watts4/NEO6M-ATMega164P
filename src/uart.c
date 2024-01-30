@@ -58,7 +58,7 @@ void sendStringUART(char *str) {
  * @return Character received
 */
 char readUART(void) {
-    while (!(UCSR0A & (1 << RXC)));
+    while (!(UCSR0A & (1 << RXC0)));
     return UDR0;
 }
 
@@ -85,5 +85,5 @@ void readStringUART(char *buffer, int bufferSize) {
  * @warning This function will block until the buffer is flushed
 */
 void flushUART(void) {
-    while (UCSR0A & (1 << RXC));
+    while (UCSR0A & (1 << RXC0));
 }
