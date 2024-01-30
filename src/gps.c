@@ -73,3 +73,13 @@ GLLSentence readGLL(void) {
         return sentence;
     }
 }
+
+char* makeSentenceString(GLLSentence sentence) {
+    char buffer[50];
+    sprintf(buffer, "Lat: %s %c, Long: %s %c, Time: %s\0", sentence.latitude, sentence.north_south, sentence.longitude, sentence.east_west, sentence.utc_time);
+    return buffer;
+}
+
+bool validGLL(GLLSentence sentence) {
+    // TODO Implement checksum validation
+}
