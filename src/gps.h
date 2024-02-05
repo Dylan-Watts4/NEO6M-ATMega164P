@@ -18,7 +18,7 @@ typedef struct {
     char east_west;     // E or W
     char utc_time[10];  // hhmmss.sss
     char status;        // A (valid) or V (not valid)
-    char checksum[3]
+    char checksum[4]    // Mode and checksum combined, POSSIBLE OVERFLOW!!
 } GLLSentence;
 
 // Functions

@@ -30,7 +30,7 @@ GLLSentence readGLL(void) {
     do {
         readStringUART(buffer, 50);
         counter++;
-        if (counter > 15) break;        // Timeout after 15 attempts
+        if (counter > 30) break;        // Timeout after 15 attempts
     } while (buffer[0] != '$' || buffer[1] != 'G' || buffer[2] != 'P' || buffer[3] != 'G' || buffer[4] != 'L' || buffer[5] != 'L');
     if (counter > 15) {
         sentence.status = 'V';
@@ -74,12 +74,40 @@ GLLSentence readGLL(void) {
     }
 }
 
-char* makeSentenceString(GLLSentence sentence) {
+char *makeSentenceString(GLLSentence sentence) {
     char buffer[50];
     sprintf(buffer, "Lat: %s %c, Long: %s %c, Time: %s\0", sentence.latitude, sentence.north_south, sentence.longitude, sentence.east_west, sentence.utc_time);
     return buffer;
 }
 
+// A valid GLL XORs every character between the $ and the ending *
 bool validGLL(GLLSentence sentence) {
     // TODO Implement checksum validation
+    // Recreate the buffer, not the most efficient method but who's gonna stop me
+    char buffer[50] = "";
+    // Required to splice an array, as sentence includes $
+    char tempSentence[6];
+    // Need to find the memory address of sentence and define the length to be copied
+    memcpy(tempSentence, &sentence.sentence, 5 * sizeof(char));
+    strcat(buffer, tempSentence); strcat(buffer, ',');
+    // The checksum also includes the commas!
+    strcat(buffer, sentence.latitude); strcat(buffer, ',');
+    strcat(buffer, north_south); strcat(buffer, ',');
+    strcat(buffer, longitude); strcat(buffer, ',');
+    strcat(buffer, east_west); strcat(buffer, ',');
+    strcat(buffer, utc_time); strcat(buffer, ',');
+    strcat(buffer, status); strcat(buffer, ',');
+    strcat(buffer, checksum[0]); strcat(buffer, '\0');
+    
+    // The sentence has been made, now it is time to XOR
+    uint8_t sum = 0;
+    for (int i = 0; i < sizeof(buffer) / sizeof(char); i++) {
+        if (buffer[i] == '\0') break;
+        sum ^= buffer[i];
+    }
+    char sumHex[3];
+    sprintf(sumHex, "%02x", sum);
+    if (sumHex[0] == sentence.checksum[2] && sumHex[1] == sentence.checksum[3])
+        return true;
+    return false;
 }
