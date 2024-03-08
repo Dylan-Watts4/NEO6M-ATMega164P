@@ -22,5 +22,7 @@ typedef struct {
 } GLLSentence;
 
 // Functions
+void initGPS(void);
+GLLSentence readGLL(void);
 
 #endif

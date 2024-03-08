@@ -1,11 +1,3 @@
-/**
- * @file gps.c
- * @author Dylan Watts
- * @date 17/1/2024
- * @version 1.0
- * @brief GPS driver for the ATMega164P
-*/
-
 #include "gps.h"
 #include "uart.h"
 
@@ -38,7 +30,7 @@ GLLSentence readGLL(void) {
     }
     // Flush the UART buffer to ensure the next sentence is read correctly
     flushUART();
-    // Tokenize the ',' character to seperate the sentence into its components
+    // Tokenize the ',' character
     char *token = strtok(buffer, ',');
     uint8_t tokenIndex = 0;
     while (token != NULL) {
@@ -70,8 +62,8 @@ GLLSentence readGLL(void) {
         }
         token = strtok(NULL, ',');
         tokenIndex++;
-        return sentence;
     }
+    return sentence;
 }
 
 char *makeSentenceString(GLLSentence sentence) {
@@ -80,34 +72,14 @@ char *makeSentenceString(GLLSentence sentence) {
     return buffer;
 }
 
-// A valid GLL XORs every character between the $ and the ending *
-bool validGLL(GLLSentence sentence) {
-    // TODO Implement checksum validation
-    // Recreate the buffer, not the most efficient method but who's gonna stop me
-    char buffer[50] = "";
-    // Required to splice an array, as sentence includes $
-    char tempSentence[6];
-    // Need to find the memory address of sentence and define the length to be copied
-    memcpy(tempSentence, &sentence.sentence, 5 * sizeof(char));
-    strcat(buffer, tempSentence); strcat(buffer, ',');
-    // The checksum also includes the commas!
-    strcat(buffer, sentence.latitude); strcat(buffer, ',');
-    strcat(buffer, north_south); strcat(buffer, ',');
-    strcat(buffer, longitude); strcat(buffer, ',');
-    strcat(buffer, east_west); strcat(buffer, ',');
-    strcat(buffer, utc_time); strcat(buffer, ',');
-    strcat(buffer, status); strcat(buffer, ',');
-    strcat(buffer, checksum[0]); strcat(buffer, '\0');
-    
-    // The sentence has been made, now it is time to XOR
-    uint8_t sum = 0;
-    for (int i = 0; i < sizeof(buffer) / sizeof(char); i++) {
-        if (buffer[i] == '\0') break;
-        sum ^= buffer[i];
+bool validGLL(char *buffer, int size) {
+    uint8_t checksum = 0;
+    for (int i = 0; i < size; i++) {
+        if (buffer[i] == '$') continue;
+        if (buffer[i] == '*') break;
+        checksum ^= buffer[i];
     }
-    char sumHex[3];
-    sprintf(sumHex, "%02x", sum);
-    if (sumHex[0] == sentence.checksum[2] && sumHex[1] == sentence.checksum[3])
-        return true;
-    return false;
+    char checksumString[3];
+    sprintf(checksumString, "%X", checksum);
+    return (checksumString[0] == buffer[size - 2]) && (checksumString[1] == buffer[size - 1]);
 }
