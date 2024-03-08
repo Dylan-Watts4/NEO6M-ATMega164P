@@ -1,19 +1,27 @@
 #ifndef UART_H
 #define UART_H
 
-#include <avr/io.h>
-#include <stdint.h>
-
 #ifndef F_CPU
 #define F_CPU 20e6
 #endif
 
-// Functions
-void initUART(uint32_t baudrate);
-void sendUART(char character);
-void sendStringUART(char *string);
-char receiveUART(void);
-char* receiveStringUART(void);
-void flushUART(void);
+#include <string.h>
+
+// Might need to change the sizes of the parts
+// This structure can be accessed globally through the name 'Sentence'
+struct GLLSentence {
+    char type[8];
+    char latitude[12];
+    char NS[2];
+    char longitude[12];
+    char EW[2];
+    char time[12];
+    char status[2];
+    char mode[2];
+} Sentence;
+
+// Only public functions you need to use
+void USART_Init(void);
+void USART_Flush(void);
 
 #endif
